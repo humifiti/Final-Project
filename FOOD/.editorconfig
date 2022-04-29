@@ -1,0 +1,11 @@
+root = true
+
+# Windows files
+[*.bat]
+end_of_line = crlf
+
+[*]
+end_of_line = lf
+charset = utf-8
+indent_style = space
+tab_width = 2
