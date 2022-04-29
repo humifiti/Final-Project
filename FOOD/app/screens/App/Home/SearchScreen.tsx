@@ -19,7 +19,6 @@ const SearchScreen = () => {
   }
   return (
     <ScreenWrapper
-      unsafe
       color="black"
       backgroundHeader="white"
       back

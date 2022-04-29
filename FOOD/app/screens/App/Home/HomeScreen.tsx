@@ -317,11 +317,11 @@ const ListRestaurant = ({ categoryId }: { categoryId: number }) => {
         <Text style={{ ...fonts.semi_bold18, flex: 1 }}>
           Featured restaurants
         </Text>
-        <TouchableOpacity>
+        {/* <TouchableOpacity>
           <Text style={{ ...fonts.regular15, color: '#F56844' }}>
             {'View All >'}
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       <FlatList
         maxToRenderPerBatch={10}

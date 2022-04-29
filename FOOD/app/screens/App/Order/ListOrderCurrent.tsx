@@ -1,4 +1,5 @@
 import R from '@app/assets/R'
+import Empty from '@app/components/Empty/Empty'
 import FstImage from '@app/components/FstImage/FstImage'
 import { DEFAULT_PARAMS } from '@app/constant/Constant'
 import { useAppSelector } from '@app/store'
@@ -147,6 +148,7 @@ const ListOrderCurrent = (props: ListOrderProps) => {
           />
         ) : null
       }
+      ListEmptyComponent={<Empty />}
     />
   )
 }

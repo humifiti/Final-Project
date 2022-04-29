@@ -1,4 +1,5 @@
 import R from '@app/assets/R'
+import Empty from '@app/components/Empty/Empty'
 import FstImage from '@app/components/FstImage/FstImage'
 import { DEFAULT_PARAMS, SCREEN_ROUTER_APP } from '@app/constant/Constant'
 import NavigationUtil from '@app/navigation/NavigationUtil'
@@ -118,14 +119,17 @@ const ListOrdered = (props: ListOrderProps) => {
         </View>
         <View style={styleListRes.v_button}>
           <TouchableOpacity style={styleListRes.button1}>
-            <Text style={{ ...fonts.semi_bold16 }}>
-              {type === 1 ? 'Cancel' : 'Rate'}
-            </Text>
+            <Text style={{ ...fonts.semi_bold16 }}>Rate</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styleListRes.button2}>
-            <Text style={styleListRes.text}>
-              {type === 1 ? 'TrackOrder' : 'Re-Order'}
-            </Text>
+          <TouchableOpacity
+            onPress={() => {
+              NavigationUtil.navigate(SCREEN_ROUTER_APP.RESTAURANT_DETAIL, {
+                id: item.restaurant_id,
+              })
+            }}
+            style={styleListRes.button2}
+          >
+            <Text style={styleListRes.text}>Re-Order</Text>
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
@@ -152,6 +156,7 @@ const ListOrdered = (props: ListOrderProps) => {
           />
         ) : null
       }
+      ListEmptyComponent={<Empty />}
     />
   )
 }
