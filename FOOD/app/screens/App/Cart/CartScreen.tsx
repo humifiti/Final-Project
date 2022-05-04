@@ -7,7 +7,7 @@ import { SCREEN_ROUTER_APP } from '@app/constant/Constant'
 import NavigationUtil from '@app/navigation/NavigationUtil'
 import { useAppDispatch, useAppSelector } from '@app/store'
 import { colors, dimensions, fonts } from '@app/theme'
-import { showConfirm } from '@app/utils/AlertHelper'
+import { showConfirm, showMessages } from '@app/utils/AlertHelper'
 import { formatNumber } from '@app/utils/Format'
 import { hideLoading, showLoading } from '@app/utils/LoadingProgressRef'
 import React, { useCallback, useEffect } from 'react'
@@ -160,23 +160,22 @@ const CartScreen = () => {
         <View style={styles.v_container}>
           <FlatList
             contentContainerStyle={styles.contentContainerStyle}
-            //style={styles.v_container}
-            // onRefresh={onRefreshData}
-            // refreshing={false}
-
             data={data}
             renderItem={renderItem}
             keyExtractor={keyExtractor}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={<Empty />}
-            // ListFooterComponent={renderFooter}
           />
 
           <ViewBottom
             handleOrder={() => {
-              NavigationUtil.navigate(SCREEN_ROUTER_APP.CHECKOUT, {
-                subTotal: totalPrice,
-              })
+              if (totalPrice === 0) {
+                showMessages(R.strings().notification, 'Cart Empty')
+              } else {
+                NavigationUtil.navigate(SCREEN_ROUTER_APP.CHECKOUT, {
+                  subTotal: totalPrice,
+                })
+              }
             }}
             totalPrice={totalPrice}
           />

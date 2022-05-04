@@ -23,9 +23,9 @@ import { getListOrderCurrent } from './slice/ListOrderCurrentSlice'
 interface ListOrderProps {
   type: number
 }
-const ListOrderCurrent = (props: ListOrderProps) => {
+const ListOrderCurrent = () => {
   const dispatch = useDispatch()
-  const { isLoading, isError, data, isLastPage, isLoadMore } = useAppSelector(
+  const { isLoading, data, isLastPage, isLoadMore } = useAppSelector(
     state => state.listOrderCurrentReducer
   )
 
@@ -51,7 +51,6 @@ const ListOrderCurrent = (props: ListOrderProps) => {
       page: DEFAULT_PARAMS.PAGE,
     })
   }
-  const { type } = props
 
   const onMomentumScrollBegin = () => {
     onEndReachedCalledDuringMomentum = false
@@ -66,6 +65,28 @@ const ListOrderCurrent = (props: ListOrderProps) => {
     }
   }
 
+  const handlePay = () => {
+    // showLoading()
+    // try {
+    //   const res =
+    //     paymentMethod.current === 1
+    //       ? await CartApi.checkOutByMomo({
+    //           user_addr_id: addressDefault.id,
+    //         })
+    //       : await CartApi.checkOutByCrypto({
+    //           user_addr_id: addressDefault.id,
+    //         })
+    //   LinkingUtils(
+    //     LINKING_TYPE.WEB,
+    //     paymentMethod.current === 1 ? res.data.payUrl : res.data.app
+    //   )
+    //   NavigationUtil.navigate(SCREEN_ROUTER_APP.ORDER)
+    // } catch (error) {
+    // } finally {
+    //   hideLoading()
+    // }
+  }
+
   if (isLoading) {
     showLoading()
   } else {
@@ -73,6 +94,7 @@ const ListOrderCurrent = (props: ListOrderProps) => {
   }
 
   const renderItem = useCallback(({ item }: { item: any }) => {
+    const handleRemove = () => {}
     return (
       <TouchableOpacity style={styleListRes.v_container}>
         <View style={styleListRes.v_row2}>
@@ -111,20 +133,15 @@ const ListOrderCurrent = (props: ListOrderProps) => {
           </View>
         </View>
         <View style={styleListRes.v_button}>
-          <TouchableOpacity style={styleListRes.button1}>
-            <Text style={{ ...fonts.semi_bold16 }}>
-              {type === 1 ? 'Cancel' : 'Rate'}
-            </Text>
+          <TouchableOpacity onPress={handleRemove} style={styleListRes.button1}>
+            <Text style={{ ...fonts.semi_bold16 }}>Cancel</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styleListRes.button2}>
-            <Text style={styleListRes.text}>
-              {type === 1 ? 'TrackOrder' : 'Re-Order'}
-            </Text>
+          <TouchableOpacity onPress={handlePay} style={styleListRes.button2}>
+            <Text style={styleListRes.text}>Pay</Text>
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
     )
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const keyExtractor = useCallback(item => `${item.id}`, [])
