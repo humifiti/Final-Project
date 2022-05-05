@@ -16,11 +16,14 @@ import R from '@app/assets/R'
 import HomeApi from './api/HomeApi'
 import Empty from '@app/components/Empty/Empty'
 import { hideLoading, showLoading } from '@app/utils/LoadingProgressRef'
+import NavigationUtil from '@app/navigation/NavigationUtil'
+import { SCREEN_ROUTER_APP } from '@app/constant/Constant'
 
 const { width } = Dimensions.get('window')
 const ListRestaurant = (props: { search: string }) => {
   const [data, setData] = useState([])
   const refTimeout = useRef<any>()
+
   useEffect(() => {
     if (refTimeout.current) clearTimeout(refTimeout.current)
 
@@ -41,7 +44,14 @@ const ListRestaurant = (props: { search: string }) => {
   }
   const renderItem = useCallback(({ item }: { item: any }) => {
     return (
-      <TouchableOpacity style={styleListRes.v_container}>
+      <TouchableOpacity
+        onPress={() => {
+          NavigationUtil.navigate(SCREEN_ROUTER_APP.RESTAURANT_DETAIL, {
+            id: item.id,
+          })
+        }}
+        style={styleListRes.v_container}
+      >
         <View style={{ flexDirection: 'row' }}>
           <View style={{}}>
             <View style={styleListRes.v_item}>

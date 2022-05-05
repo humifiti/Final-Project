@@ -522,7 +522,7 @@ SPEC CHECKSUMS:
   CodePush: 9bb93f52a44ee80b72739d89dead9c7e86c3bd3a
   DoubleConversion: cf9b38bf0b2d048436d9a82ad2abe1404f11e7de
   FBLazyVector: e686045572151edef46010a6f819ade377dfeb4b
-  FBReactNativeSpec: b71cf568cc4357d5e2a7e7ad8cb32413ee3da7bb
+  FBReactNativeSpec: 85d43dd7521257ca3dbde1872b02f58e56a770dc
   glog: 73c2498ac6884b13ede40eda8228cb1eee9d9d62
   JWT: 9b5c05abbcc1a0e69c3c91e1655b3387fc7e581d
   libwebp: e90b9c01d99205d03b6bb8f2c8c415e5a4ef66f0

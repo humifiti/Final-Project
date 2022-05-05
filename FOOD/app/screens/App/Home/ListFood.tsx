@@ -17,32 +17,51 @@ import R from '@app/assets/R'
 import HomeApi from './api/HomeApi'
 import { formatNumber } from '@app/utils/Format'
 import { hideLoading, showLoading } from '@app/utils/LoadingProgressRef'
+import Empty from '@app/components/Empty/Empty'
+import NavigationUtil from '@app/navigation/NavigationUtil'
+import { SCREEN_ROUTER_APP } from '@app/constant/Constant'
 
 const { width } = Dimensions.get('window')
-const ListFood = (props: { search: string }) => {
-  const [data, setData] = useState([])
+
+const ListFood = (props: { searchText: string }) => {
+  const [dataListFood, setDataListFood] = useState([])
   const refTimeout = useRef<any>()
+  // useEffect là hàm tự động chay vào khi vào màn lần đầu tiên
   useEffect(() => {
     if (refTimeout.current) clearTimeout(refTimeout.current)
 
     refTimeout.current = setTimeout(() => {
-      getListFood()
+      getListFood() // gọi tới hàm call API
     }, 500)
-  }, [props.search])
+  }, [props.searchText]) // props.SeachText ở đây để khi searchText thay đổi thì nó sẽ chạy lại hàm useEffect, nếu ko có nó sẽ không chạy lại
+
+  //hàm useEffect sẽ được tự động gọi mỗi khi tk searchText thay đổi,
+  // nghĩa là khi thằng search của màn Seach Screen, hay ta gõ text
 
   const getListFood = async () => {
+    // đây là hàm cha để gọi api
     showLoading()
     try {
-      const res = await HomeApi.searchFood({ name: props.search })
-      setData(res.data)
+      const res = await HomeApi.searchFood({ name: props.searchText }) // đây là bước gọi API
+      setDataListFood(res.data) //res.data là dữ liệu api trả về, ta truyền res.data vào hàm setData để lưu dữ liệu vào biến state tên là data
+      // nếu hàm chạy thành công thì nó sẽ ko vào catch
     } catch (error) {
+      //nếu mà không chạy vào đây
     } finally {
       hideLoading()
     }
   }
+
   const renderItem = useCallback(({ item }: { item: any }) => {
     return (
-      <TouchableOpacity style={styleListFood.v_container}>
+      <TouchableOpacity
+        onPress={() => {
+          NavigationUtil.navigate(SCREEN_ROUTER_APP.RESTAURANT_DETAIL, {
+            id: item.restaurant_id,
+          })
+        }}
+        style={styleListFood.v_container}
+      >
         <FstImage
           style={styleListFood.image}
           source={{ uri: item?.images?.url }}
@@ -64,6 +83,7 @@ const ListFood = (props: { search: string }) => {
       </TouchableOpacity>
     )
   }, [])
+
   const keyExtractor = useCallback(item => `${item.id}`, [])
   return (
     <FlatList
@@ -72,11 +92,12 @@ const ListFood = (props: { search: string }) => {
       contentContainerStyle={{ paddingBottom: 50 }}
       style={styleListFood.v_listProduct}
       columnWrapperStyle={styleListFood.v_column}
-      data={data}
-      renderItem={renderItem}
+      data={dataListFood} // truyền dữ liệu từ api trả về vào FlatList thông qua truyền dataListFood vào data
+      renderItem={renderItem} // hiện thị ra các Item
       keyExtractor={keyExtractor}
       showsVerticalScrollIndicator={false}
       numColumns={2}
+      ListEmptyComponent={<Empty />}
     />
   )
 }

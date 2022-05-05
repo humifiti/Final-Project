@@ -10,3 +10,6 @@ export default {
   searchRest: (payload: { name: string }) =>
     ApiClient.get(`/api/v1/restaurant`, { params: payload }),
 }
+
+// đây là file export
+// ta sẽ export (xuất) các api được khai báo trong file này

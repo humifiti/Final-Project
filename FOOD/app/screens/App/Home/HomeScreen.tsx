@@ -76,9 +76,11 @@ const HomeScreen = () => {
   }
 
   return (
+    // v_container chứa giao diện của thẻ SafeAreaView
     <SafeAreaView style={styles.v_container}>
       <ScrollView
         style={styles.v_container}
+        //hiển thị refresh
         refreshControl={<RefreshControl refreshing={false} />}
         showsVerticalScrollIndicator={false}
       >
@@ -91,14 +93,18 @@ const HomeScreen = () => {
     </SafeAreaView>
   )
 }
-
+// cái này gọi là một Function Components
 const Search = () => {
   return (
     <TouchableOpacity
       onPress={() => {
         NavigationUtil.navigate(SCREEN_ROUTER_APP.SEARCH)
       }}
-      style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 15,
+      }}
     >
       <View style={styleSearch.v_container}>
         <FstImage style={styleSearch.ic_search} source={R.images.ic_search} />
@@ -141,13 +147,16 @@ const Category = ({
   useEffect(() => {
     getDataCategory()
   }, [])
+  // vừa vào sẽ gọi vào hàm useEffect lần đầu tiên
 
   const getDataCategory = async () => {
     showLoading()
     try {
       const res = await HomeApi.getCategory()
-      const newData = res.data
+      const newData = res.data // tạo biến mới là newData = dữ liệu trả về khi call APi
+      //res.data trả về là 1 màng, ta sẽ xử lý tk đầu tiên đc chọn
 
+      // newData
       newData.forEach((value, index) => {
         if (index === 0) {
           newData[index].isChecked = true
@@ -156,6 +165,8 @@ const Category = ({
         }
       })
       setDataCategory([...newData])
+
+      //truyền newData vào hàm setDataCategory để câp nhật newData vào biến dataCategory
       setCategoryId(res.data[0].id)
     } catch (error) {
     } finally {
@@ -168,7 +179,7 @@ const Category = ({
       <TouchableOpacity
         onPress={() => {
           const newData = [...dataCategory]
-
+          // đoạn để xử lý khi bấm vào Item nào thì item đó chuyển màu cam
           newData.forEach((value: any, index) => {
             if (value.id !== item.id) {
               newData[index].isChecked = false
@@ -176,6 +187,7 @@ const Category = ({
               newData[index].isChecked = true
             }
           })
+
           setDataCategory([...newData])
           setCategoryId(item.id)
         }}
