@@ -1,10 +1,10 @@
-import React, { Component, useEffect } from 'react'
+import reactotron from '@app/config/ReactotronConfig'
+import React, { useEffect } from 'react'
+import { Linking } from 'react-native'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 // import { StyleSheet } from 'react-native';
 // import { connect } from 'react-redux';
 import AppNavigator from './app/navigation/AppNavigator'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { Linking } from 'react-native'
-import reactotron from '@app/config/ReactotronConfig'
 
 // import OneSignalHelper from './app/utils/OneSignalHelper';
 

@@ -13,6 +13,7 @@ import { hideLoading, showLoading } from '@app/utils/LoadingProgressRef'
 import React, { useCallback, useEffect } from 'react'
 import {
   FlatList,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -151,7 +152,6 @@ const CartScreen = () => {
   return (
     <ScreenWrapper
       back
-      unsafe
       color="black"
       titleHeader="Cart"
       backgroundHeader="white"
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     flexDirection: 'row',
     paddingTop: 15,
-    paddingBottom: getBottomSpace(),
+    paddingBottom: Platform.OS === 'ios' ? getBottomSpace() : 20,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

@@ -466,6 +466,7 @@ const styles = StyleSheet.create({
     width: '100%',
     aspectRatio: 2.1,
     borderRadius: 15,
+    marginTop: Platform.OS === 'android' ? 20 : 0,
   },
   v_back: {
     backgroundColor: 'white',
@@ -473,7 +474,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     left: 10,
-    top: 10,
+    top: Platform.OS === 'android' ? 30 : 10,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 12,

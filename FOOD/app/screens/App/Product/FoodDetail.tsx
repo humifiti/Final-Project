@@ -8,6 +8,7 @@ import { formatNumber } from '@app/utils/Format'
 import { hideLoading, showLoading } from '@app/utils/LoadingProgressRef'
 import React, { useEffect, useState } from 'react'
 import {
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -72,7 +73,10 @@ const FoodDetail = (props: FoodProps) => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <ScrollView style={styles.v_container}>
-        <FstImage style={styles.img_banner} source={R.images.img_food_banner} />
+        <FstImage
+          style={styles.img_banner}
+          source={{ uri: data?.images?.url }}
+        />
         <TouchableOpacity
           onPress={() => {
             NavigationUtil.goBack()
@@ -167,6 +171,8 @@ const styles = StyleSheet.create({
   img_banner: {
     width: '100%',
     aspectRatio: 1.56,
+    marginTop: Platform.OS === 'android' ? 20 : 0,
+    borderRadius: 12,
   },
   v_back: {
     backgroundColor: 'white',
@@ -174,7 +180,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     left: 10,
-    top: 10,
+    top: Platform.OS === 'android' ? 30 : 10,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 12,
