@@ -8,6 +8,7 @@ import CheckOutScreen from '@app/screens/App/Cart/CheckOutScreen'
 import SearchScreen from '@app/screens/App/Home/SearchScreen'
 import OrderDetailScreen from '@app/screens/App/Order/OrderDetailScreen'
 import OrderScreen from '@app/screens/App/Order/OrderScreen'
+import RateRestaurant from '@app/screens/App/Order/RateRestaurant'
 import FoodDetail from '@app/screens/App/Product/FoodDetail'
 import RestaurantDetail from '@app/screens/App/Product/RestaurantDetail'
 import { createStackNavigator } from '@react-navigation/stack'
@@ -25,6 +26,7 @@ const {
   CART,
   CHECKOUT,
   ORDER_DETAIL,
+  RATE_RESTAURANT,
 } = SCREEN_ROUTER_APP
 const Stack = createStackNavigator()
 
@@ -40,6 +42,7 @@ const mainScreen = {
   [CART]: CartScreen,
   [CHECKOUT]: CheckOutScreen,
   [ORDER_DETAIL]: OrderDetailScreen,
+  [RATE_RESTAURANT]: RateRestaurant,
 }
 
 export const StackAppCustomerScreen = () => {

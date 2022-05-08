@@ -4,8 +4,10 @@ import FstImage from '@app/components/FstImage/FstImage'
 import { DEFAULT_PARAMS } from '@app/constant/Constant'
 import { useAppSelector } from '@app/store'
 import { colors, dimensions, fonts } from '@app/theme'
+import { showConfirm } from '@app/utils/AlertHelper'
 import DateUtil from '@app/utils/DateUtil'
 import { formatNumber } from '@app/utils/Format'
+import LinkingUtils, { LINKING_TYPE } from '@app/utils/LinkingUtils'
 import { hideLoading, showLoading } from '@app/utils/LoadingProgressRef'
 import React, { useCallback, useEffect, useState } from 'react'
 import {
@@ -18,6 +20,7 @@ import {
   View,
 } from 'react-native'
 import { useDispatch } from 'react-redux'
+import OrderApi from './api/OrderApi'
 import { getListOrderCurrent } from './slice/ListOrderCurrentSlice'
 
 interface ListOrderProps {
@@ -65,26 +68,8 @@ const ListOrderCurrent = () => {
     }
   }
 
-  const handlePay = () => {
-    // showLoading()
-    // try {
-    //   const res =
-    //     paymentMethod.current === 1
-    //       ? await CartApi.checkOutByMomo({
-    //           user_addr_id: addressDefault.id,
-    //         })
-    //       : await CartApi.checkOutByCrypto({
-    //           user_addr_id: addressDefault.id,
-    //         })
-    //   LinkingUtils(
-    //     LINKING_TYPE.WEB,
-    //     paymentMethod.current === 1 ? res.data.payUrl : res.data.app
-    //   )
-    //   NavigationUtil.navigate(SCREEN_ROUTER_APP.ORDER)
-    // } catch (error) {
-    // } finally {
-    //   hideLoading()
-    // }
+  const handlePay = (url: string) => {
+    LinkingUtils(LINKING_TYPE.WEB, url)
   }
 
   if (isLoading) {
@@ -93,56 +78,83 @@ const ListOrderCurrent = () => {
     hideLoading()
   }
 
-  const renderItem = useCallback(({ item }: { item: any }) => {
-    const handleRemove = () => {}
-    return (
-      <TouchableOpacity style={styleListRes.v_container}>
-        <View style={styleListRes.v_row2}>
-          <View style={styleListRes.v_item}>
-            <FstImage
-              style={styleListRes.image}
-              source={
-                item.restaurant
-                  ? { uri: item.restaurant.logo.url }
-                  : R.images.img_pizza_hut
-              }
-            />
-          </View>
-          <View style={styleListRes.v_info}>
-            <View style={styleListRes.v_row}>
-              <Text style={styleListRes.txt_time}>
-                {DateUtil.formatDateTime(item.created_at)}
-              </Text>
-              <Text style={{ ...fonts.regular16, color: colors.primary }}>
-                {`${formatNumber(item.total_price)} đ`}
-              </Text>
-            </View>
-            <View style={styleListRes.v_name}>
-              <Text style={{ ...fonts.semi_bold14 }}>
-                {item?.restaurant?.name}
-              </Text>
+  const renderItem = useCallback(
+    ({ item }: { item: any }) => {
+      console.log('renderItem')
+      const handleRemove = () => {
+        showConfirm(
+          R.strings().notification,
+          'Do you want to cancel this order',
+          async () => {
+            showLoading()
+            try {
+              await OrderApi.cancelOrder({ order_id: item.id })
+              dispatch(getListOrderCurrent(body))
+            } catch (error) {
+            } finally {
+              hideLoading()
+            }
+          }
+        )
+      }
+      return (
+        <TouchableOpacity style={styleListRes.v_container}>
+          <View style={styleListRes.v_row2}>
+            <View style={styleListRes.v_item}>
               <FstImage
-                style={styleListRes.image_tick}
-                source={R.images.ic_tick}
+                style={styleListRes.image}
+                source={
+                  item.restaurant
+                    ? { uri: item.restaurant.logo.url }
+                    : R.images.img_pizza_hut
+                }
               />
             </View>
-            <View style={styleListRes.v_status}>
-              <View style={styleListRes.v_dot2} />
-              <Text style={styleListRes.txt_status}>Order Delivered</Text>
+            <View style={styleListRes.v_info}>
+              <View style={styleListRes.v_row}>
+                <Text style={styleListRes.txt_time}>
+                  {DateUtil.formatDateTime(item.created_at)}
+                </Text>
+                <Text style={{ ...fonts.regular16, color: colors.primary }}>
+                  {`${formatNumber(item.total_price)} đ`}
+                </Text>
+              </View>
+              <View style={styleListRes.v_name}>
+                <Text style={{ ...fonts.semi_bold14 }}>
+                  {item?.restaurant?.name}
+                </Text>
+                <FstImage
+                  style={styleListRes.image_tick}
+                  source={R.images.ic_tick}
+                />
+              </View>
+              <View style={styleListRes.v_status}>
+                <View style={styleListRes.v_dot2} />
+                <Text style={styleListRes.txt_status}>Order Delivered</Text>
+              </View>
             </View>
           </View>
-        </View>
-        <View style={styleListRes.v_button}>
-          <TouchableOpacity onPress={handleRemove} style={styleListRes.button1}>
-            <Text style={{ ...fonts.semi_bold16 }}>Cancel</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handlePay} style={styleListRes.button2}>
-            <Text style={styleListRes.text}>Pay</Text>
-          </TouchableOpacity>
-        </View>
-      </TouchableOpacity>
-    )
-  }, [])
+          <View style={styleListRes.v_button}>
+            <TouchableOpacity
+              onPress={handleRemove}
+              style={styleListRes.button1}
+            >
+              <Text style={{ ...fonts.semi_bold16 }}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                handlePay(item.url_payment)
+              }}
+              style={styleListRes.button2}
+            >
+              <Text style={styleListRes.text}>Pay</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      )
+    },
+    [body, dispatch]
+  )
 
   const keyExtractor = useCallback(item => `${item.id}`, [])
   return (
