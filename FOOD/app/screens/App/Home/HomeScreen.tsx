@@ -136,7 +136,7 @@ const styleSearch = StyleSheet.create({
     ...fonts.regular14,
   },
 })
-
+// cái này gọi là một Function Components
 const Category = ({
   setCategoryId,
 }: {
@@ -262,20 +262,20 @@ const styleCategory = StyleSheet.create({
     marginHorizontal: 5,
   },
 })
-
+// cái này gọi là một Function Components
 const ListRestaurant = ({ categoryId }: { categoryId: number }) => {
   const { lat, long } = useAppSelector(state => state.locationReducer)
   const [dataRes, setDataRes] = useState([])
 
   useEffect(() => {
     getDataRestaurant()
-  }, [long, lat, categoryId])
+  }, [long, lat, categoryId]) //categoryid được cập nhật thì useefect được chay lại, gọi đến hàm getDataRestaurant
 
   const getDataRestaurant = async () => {
     showLoading()
     try {
       const res = await HomeApi.getRestaurant({
-        category: categoryId,
+        category: categoryId, //call api vs id đc cập nhật
         lat: lat,
         lng: long,
       })
@@ -376,9 +376,10 @@ const styleListRes = StyleSheet.create({
     paddingLeft: 15,
   },
 })
-
+// cái này gọi là một Function Components
 const ListFood = () => {
   const [dataFood, setDataFood] = useState([])
+
   useEffect(() => {
     getDataFood()
   }, [])

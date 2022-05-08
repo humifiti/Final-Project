@@ -24,14 +24,22 @@ import CartApi from './api/CartApi'
 import { getListCart, updateQuantity } from './slice/CartSlice'
 
 const CartScreen = () => {
-  const { isLoading, isError, data, totalPrice } = useAppSelector(
+  // đây là dữ liệu APi cart trả về
+  // data là dữ liệu giỏ hàng
+  // totalPrice là dữ liệu giá tiền
+  const { isLoading, data, totalPrice } = useAppSelector(
     state => state.cartReducer
   )
   const dispatch = useAppDispatch()
+
+  //
   // const [data, setData] = useState([])
   useEffect(() => {
-    dispatch(getListCart())
+    //hàm call Api danh sách cart
 
+    // gọi vào hàm getListCart ở file CartSlice để call API
+    // thằng này để câp nhật dự liệu giỏ hàng cho tk data ở trên
+    dispatch(getListCart())
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -47,7 +55,10 @@ const CartScreen = () => {
         quantity,
       }
       try {
+        // khi bấm + - sẽ gọi api update số lượng giỏ hàng
         await CartApi.updateCart(payload)
+        // dùng dispatch để gọi vào hàm updateQuantitty trong fileCartSlice
+        // tk này cập nhật dữ liệu số lượng cho tk data và giá giỏ hàng cho tk totalPrice
         dispatch(
           updateQuantity({
             index,
@@ -59,6 +70,7 @@ const CartScreen = () => {
     [dispatch]
   )
 
+  // hàm gọi remove món ăn trong giỏ hàng
   const handleRemoveItem = useCallback(
     (food_id: number) => {
       showConfirm(
@@ -67,6 +79,7 @@ const CartScreen = () => {
         async () => {
           showLoading()
           try {
+            // call api xóa món ăn
             await CartApi.deleteCart({ food_id })
             dispatch(getListCart())
           } catch (error) {
@@ -147,11 +160,13 @@ const CartScreen = () => {
     },
     [handleRemoveItem, handleUpdateQuantity]
   )
+
   const keyExtractor = useCallback(item => `${item.food_id}`, [])
 
   return (
     <ScreenWrapper
       back
+      unsafe
       color="black"
       titleHeader="Cart"
       backgroundHeader="white"

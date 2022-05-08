@@ -29,10 +29,13 @@ interface RestaurantProps {
 const RestaurantDetail = (props: RestaurantProps) => {
   const { lat, long } = useAppSelector(state => state.locationReducer)
   const [categoryId, setCategoryId] = useState(0)
-  const [dataRest, setDataRest] = useState<any>()
+  const [dataRest, setDataRest] = useState<any>() // biến dataRest sẽ dùng để cập nhật dữ liệu api chi tiết nhà hàng
   const [dataFeaturedFood, setDataFeaturedFood] = useState<any[]>([])
   const [dataCategory, setDataCategory] = useState<any[]>([])
   const [dataFood, setDataFood] = useState<any[]>([])
+
+  //vào màn Restaurant Detail nó sẽ chạy vào hàm useEffect
+  //đầu tiên  để gọi vào hàm getDataRestaurantDetail()
   useEffect(() => {
     getDataRestaurantDetail()
   }, [])
@@ -43,18 +46,32 @@ const RestaurantDetail = (props: RestaurantProps) => {
 
   const getDataRestaurantDetail = async () => {
     showLoading()
+    // đầu tiên ta sẽ gọi API chi tiết nhà hàng
     try {
       const res = await ProductApi.getRestaurantDetail({
         id: props.route.params.id,
         lat: lat,
         lng: long,
       })
+      //sau khi gọi xong api chi tiết nhà hàng, thì ta sẽ lưu dữ liệu api trả về
+      // thông qua hàm setDataRes vào biến dataRes
+      setDataRest(res.data)
+
+      // sau khi gọi api chi tiết nhà hàng ở trên, ta sẽ có được id của nhà hàng là res.data.id để
+      // gọi api Featured Item thông qua id của nhà hàng
       const resFeaturedItem = await ProductApi.getFeaturedItem({
         id: res.data.id,
         order_by: 'rating_desc',
       })
+      // sau khi gọi APi getFeatured Item, ta sẽ lưu dữ liệu api getFeatureItem trả về
+      // thông qua hàm setDataFeaturedFood vào biến dataFeaturedFood
+      setDataFeaturedFood(resFeaturedItem.data)
+
+      // sau khi gọi api chi tiết nhà hàng ở trên, ta sẽ có được id của nhà hàng là res.data.id để
+      // gọi api Category thông qua id của nhà hàng
       const resCategory = await ProductApi.getCategory({ id: res.data.id })
 
+      // sau khi lấy đc dữ liệu category trả về, ta sẽ xử lý dữ liệu để hiện thị màu cam
       const newData = resCategory.data
 
       newData.forEach((value, index) => {
@@ -65,8 +82,8 @@ const RestaurantDetail = (props: RestaurantProps) => {
         }
       })
 
-      setDataRest(res.data)
-      setDataFeaturedFood(resFeaturedItem.data)
+      // lưu dữ liệu api category trả về sau khi được xử lý màu cam thông qua  hàm setDataCategory
+      // vào biến dataCategory
       setDataCategory([...newData])
       setCategoryId(resCategory.data[0].category_id)
     } catch (error) {
@@ -111,7 +128,7 @@ const RestaurantDetail = (props: RestaurantProps) => {
         <View style={styleListFood.v_row}>
           <Text style={{ ...fonts.semi_bold14 }}>{`${formatNumber(
             item?.price
-          )} $`}</Text>
+          )} đ`}</Text>
         </View>
       </TouchableOpacity>
     )
@@ -122,7 +139,10 @@ const RestaurantDetail = (props: RestaurantProps) => {
       <FlatList
         ListHeaderComponent={
           <>
+            {/* tra sẽ truyền linh ảnh banner từ dataRes là dataRes.cover.url vào componet Banner */}
             <Banner banner={dataRest?.cover?.url} />
+
+            {/* ta sẽ truyền dữ liệu từ dataRes vào componet InfoRestaurant để hiện thị dữ liệu logo, tên quán, địa chỉ,... */}
             <InfoRestaurant
               logo={dataRest?.logo?.url}
               name={dataRest?.name}
@@ -130,9 +150,11 @@ const RestaurantDetail = (props: RestaurantProps) => {
               rating={dataRest?.rating}
               count_rating={dataRest?.rating_count}
             />
+            {/* truyền dữ liệu từ dataFeaturedFood vào components ListFoodFeatured */}
             {dataFeaturedFood.length > 0 && (
               <ListFoodFeatured dataFeaturedFood={dataFeaturedFood} />
             )}
+            {/* truyền dữ liệu từ dataCategory vào components Category */}
             {dataCategory.length > 0 && (
               <Category
                 setCategoryId={setCategoryId}

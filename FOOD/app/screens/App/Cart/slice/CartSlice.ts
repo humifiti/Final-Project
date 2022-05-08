@@ -7,7 +7,7 @@ const initState = {
   data: [],
   totalPrice: 0,
 }
-
+// goi APi ở file này đẻ lưu dữ liệu vào reducer (global)
 export const getListCart = createAsyncThunk('DataHomeSlice', async () => {
   const res = await CartApi.getCart()
   return res
@@ -26,6 +26,7 @@ const listCartSlice = createSlice({
   name: 'ListCartSlice',
   initialState: initState,
   reducers: {
+    //hàm để tính toán giá và cập nhật số lượng
     updateQuantity: (state, action) => {
       const { data } = state
       const { index, quantity } = action.payload
