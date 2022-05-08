@@ -45,7 +45,6 @@ const FoodDetail = (props: FoodProps) => {
   const handleAddCart = async () => {
     showLoading()
     try {
-      //call api Cart, thì ta phải truyền count là số lượng món ăn vào api Add Cart
       await ProductApi.addCart({ food_id: data.id, quantity: count })
       showMessages('Notification', 'Added successfully')
     } catch (error: any) {

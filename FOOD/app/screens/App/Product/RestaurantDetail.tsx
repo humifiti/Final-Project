@@ -2,7 +2,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import R from '@app/assets/R'
 import FstImage from '@app/components/FstImage/FstImage'
-import { SCREEN_ROUTER_APP } from '@app/constant/Constant'
+import { DEFAULT_PARAMS, SCREEN_ROUTER_APP } from '@app/constant/Constant'
 import NavigationUtil from '@app/navigation/NavigationUtil'
 import { useAppSelector } from '@app/store'
 import { colors, dimensions, fonts } from '@app/theme'
@@ -10,6 +10,7 @@ import { formatNumber } from '@app/utils/Format'
 import { hideLoading, showLoading } from '@app/utils/LoadingProgressRef'
 import React, { useCallback, useEffect, useState } from 'react'
 import {
+  Alert,
   FlatList,
   Platform,
   SafeAreaView,
@@ -20,6 +21,8 @@ import {
   View,
 } from 'react-native'
 import FastImage from 'react-native-fast-image'
+import { useDispatch } from 'react-redux'
+import { getListFavoriteFood } from '../Favorite/slice/ListFavoriteFoodSlice'
 import ProductApi from './api/ProductApi'
 
 interface RestaurantProps {
@@ -29,13 +32,12 @@ interface RestaurantProps {
 const RestaurantDetail = (props: RestaurantProps) => {
   const { lat, long } = useAppSelector(state => state.locationReducer)
   const [categoryId, setCategoryId] = useState(0)
-  const [dataRest, setDataRest] = useState<any>() // biến dataRest sẽ dùng để cập nhật dữ liệu api chi tiết nhà hàng
+  const [dataRest, setDataRest] = useState<any>()
   const [dataFeaturedFood, setDataFeaturedFood] = useState<any[]>([])
   const [dataCategory, setDataCategory] = useState<any[]>([])
   const [dataFood, setDataFood] = useState<any[]>([])
+  const dispatch = useDispatch()
 
-  //vào màn Restaurant Detail nó sẽ chạy vào hàm useEffect
-  //đầu tiên  để gọi vào hàm getDataRestaurantDetail()
   useEffect(() => {
     getDataRestaurantDetail()
   }, [])
@@ -102,6 +104,30 @@ const RestaurantDetail = (props: RestaurantProps) => {
     } catch (error) {}
   }
 
+  const handleLike = async (item: any) => {
+    try {
+      if (item.is_like) {
+        await ProductApi.unLikeFood({ food_id: item.id })
+        getListFood()
+        dispatch(
+          getListFavoriteFood({
+            page: DEFAULT_PARAMS.PAGE,
+            limit: DEFAULT_PARAMS.LIMIT,
+          })
+        )
+      } else {
+        await ProductApi.likeFood({ food_id: item.id })
+        getListFood()
+        dispatch(
+          getListFavoriteFood({
+            page: DEFAULT_PARAMS.PAGE,
+            limit: DEFAULT_PARAMS.LIMIT,
+          })
+        )
+      }
+    } catch (error) {}
+  }
+
   const renderItem = useCallback(({ item }: { item: any }) => {
     return (
       <TouchableOpacity
@@ -130,6 +156,20 @@ const RestaurantDetail = (props: RestaurantProps) => {
             item?.price
           )} đ`}</Text>
         </View>
+        <TouchableOpacity
+          onPress={() => {
+            handleLike(item)
+          }}
+          style={[
+            styleListFood.icon_like,
+            { backgroundColor: item.is_like ? colors.primary : colors.line },
+          ]}
+        >
+          <FstImage
+            style={{ width: 18, height: 18 }}
+            source={R.images.ic_heart}
+          />
+        </TouchableOpacity>
       </TouchableOpacity>
     )
   }, [])
@@ -144,6 +184,7 @@ const RestaurantDetail = (props: RestaurantProps) => {
 
             {/* ta sẽ truyền dữ liệu từ dataRes vào componet InfoRestaurant để hiện thị dữ liệu logo, tên quán, địa chỉ,... */}
             <InfoRestaurant
+              id={dataRest?.id}
               logo={dataRest?.logo?.url}
               name={dataRest?.name}
               address={dataRest?.address}
@@ -152,7 +193,10 @@ const RestaurantDetail = (props: RestaurantProps) => {
             />
             {/* truyền dữ liệu từ dataFeaturedFood vào components ListFoodFeatured */}
             {dataFeaturedFood.length > 0 && (
-              <ListFoodFeatured dataFeaturedFood={dataFeaturedFood} />
+              <ListFoodFeatured
+                getDataRestaurantDetail={getDataRestaurantDetail}
+                dataFeaturedFood={dataFeaturedFood}
+              />
             )}
             {/* truyền dữ liệu từ dataCategory vào components Category */}
             {dataCategory.length > 0 && (
@@ -176,12 +220,14 @@ const RestaurantDetail = (props: RestaurantProps) => {
 }
 
 const InfoRestaurant = ({
+  id,
   logo,
   name,
   address,
   rating,
   count_rating,
 }: {
+  id: number
   logo: string
   name: string
   address: string
@@ -210,7 +256,11 @@ const InfoRestaurant = ({
         <Text style={styles.txt_evaluate}>
           {rating} <Text style={styles.txt_number}>{`(${count_rating}+)`}</Text>
         </Text>
-        <TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            NavigationUtil.navigate(SCREEN_ROUTER_APP.REVIEW, { id })
+          }}
+        >
           <Text style={styles.txt_review}>See Review</Text>
         </TouchableOpacity>
       </View>
@@ -261,7 +311,37 @@ const Banner = ({ banner }: { banner: string }) => {
   )
 }
 
-const ListFoodFeatured = ({ dataFeaturedFood }: { dataFeaturedFood: any }) => {
+const ListFoodFeatured = ({
+  dataFeaturedFood,
+  getDataRestaurantDetail,
+}: {
+  dataFeaturedFood: any
+  getDataRestaurantDetail: () => void
+}) => {
+  const dispatch = useDispatch()
+  const handleLike = async (item: any) => {
+    try {
+      if (item.is_like) {
+        await ProductApi.unLikeFood({ food_id: item.id })
+        getDataRestaurantDetail()
+        dispatch(
+          getListFavoriteFood({
+            page: DEFAULT_PARAMS.PAGE,
+            limit: DEFAULT_PARAMS.LIMIT,
+          })
+        )
+      } else {
+        await ProductApi.likeFood({ food_id: item.id })
+        getDataRestaurantDetail()
+        dispatch(
+          getListFavoriteFood({
+            page: DEFAULT_PARAMS.PAGE,
+            limit: DEFAULT_PARAMS.LIMIT,
+          })
+        )
+      }
+    } catch (error) {}
+  }
   const renderItem = useCallback(({ item }: { item: any }) => {
     return (
       <TouchableOpacity
@@ -295,6 +375,20 @@ const ListFoodFeatured = ({ dataFeaturedFood }: { dataFeaturedFood: any }) => {
             item?.price
           )} đ`}</Text>
         </View>
+        <TouchableOpacity
+          onPress={() => {
+            handleLike(item)
+          }}
+          style={[
+            styleListRes.icon_like,
+            { backgroundColor: item.is_like ? colors.primary : colors.line },
+          ]}
+        >
+          <FstImage
+            style={{ width: 18, height: 18 }}
+            source={R.images.ic_heart}
+          />
+        </TouchableOpacity>
       </TouchableOpacity>
     )
   }, [])
@@ -325,6 +419,16 @@ const ListFoodFeatured = ({ dataFeaturedFood }: { dataFeaturedFood: any }) => {
 }
 
 const styleListRes = StyleSheet.create({
+  icon_like: {
+    width: 35,
+    height: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 35 / 2,
+    position: 'absolute',
+    top: 15,
+    right: 10,
+  },
   icon: { width: 12, height: 12, marginRight: 5 },
   image: { width: '100%', height: 150, borderRadius: 20 },
   v_container: {
@@ -422,6 +526,16 @@ const Category = ({
 }
 
 const styleListFood = StyleSheet.create({
+  icon_like: {
+    width: 35,
+    height: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 35 / 2,
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
   v_listProduct: {
     paddingBottom: Platform.OS === 'ios' ? 60 : 80,
     paddingHorizontal: 15,

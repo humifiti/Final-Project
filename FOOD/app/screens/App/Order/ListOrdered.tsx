@@ -24,9 +24,9 @@ import { getListOrdered } from './slice/ListOrderedSlice'
 interface ListOrderProps {
   type: number
 }
-const ListOrdered = (props: ListOrderProps) => {
+const ListOrdered = () => {
   const dispatch = useDispatch()
-  const { isLoading, isError, data, isLastPage, isLoadMore } = useAppSelector(
+  const { isLoading, data, isLastPage, isLoadMore } = useAppSelector(
     state => state.listOrderedReducer
   )
 
@@ -52,7 +52,6 @@ const ListOrdered = (props: ListOrderProps) => {
       page: DEFAULT_PARAMS.PAGE,
     })
   }
-  const { type } = props
 
   const onMomentumScrollBegin = () => {
     onEndReachedCalledDuringMomentum = false
@@ -72,6 +71,7 @@ const ListOrdered = (props: ListOrderProps) => {
   } else {
     hideLoading()
   }
+
   const renderItem = useCallback(({ item }: { item: any }) => {
     return (
       <TouchableOpacity
@@ -113,12 +113,23 @@ const ListOrdered = (props: ListOrderProps) => {
             </View>
             <View style={styleListRes.v_status}>
               <View style={styleListRes.v_dot2} />
-              <Text style={styleListRes.txt_status}>Order Delivered</Text>
+              <Text style={styleListRes.txt_status}>
+                {item.order_tracking.state}
+              </Text>
             </View>
           </View>
         </View>
         <View style={styleListRes.v_button}>
-          <TouchableOpacity style={styleListRes.button1}>
+          <TouchableOpacity
+            onPress={() => {
+              NavigationUtil.navigate(SCREEN_ROUTER_APP.RATE_RESTAURANT, {
+                logo: item.restaurant.logo.url,
+                name: item?.restaurant?.name,
+                id: item.restaurant_id,
+              })
+            }}
+            style={styleListRes.button1}
+          >
             <Text style={{ ...fonts.semi_bold16 }}>Rate</Text>
           </TouchableOpacity>
           <TouchableOpacity

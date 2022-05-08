@@ -11,8 +11,6 @@ import ListFood from './ListFood'
 import ListRestaurant from './ListRestaurant'
 
 const SearchScreen = () => {
-  //biến search là một state, ta quản lý state thông qua useState
-  //search là nameState, setSearch là hàm cập nhật giá trị cho biến search, còn '' là giá trị ban đầu của biến search
   const [search, setSearch] = useState<string>('')
   const [page, setPage] = useState(0)
   const onChangeTab = (changeTabProps: { i: number }) => {
@@ -30,7 +28,6 @@ const SearchScreen = () => {
         <View style={{ flex: 1, backgroundColor: 'white' }}>
           <SearchBar
             placeholder={'Find for food or restaurant...'}
-            //hàm setSearch sẽ nhận dữ liệu từ hàm onChangeText để cập nhât dữ liệu cho biến search
             onChangeText={setSearch}
             value={search}
             containerStyle={styles.v_container_search}
@@ -52,8 +49,6 @@ const SearchScreen = () => {
             renderTabBar={() => <TabBarComponent />}
           >
             <Tab heading={'Food Item'}>
-              {/* searchText là 1 props của Component ListFood, 
-              ta truyền search  vào searchText 1 là truyền vào props của tk ListFood */}
               <ListFood searchText={search} />
             </Tab>
 

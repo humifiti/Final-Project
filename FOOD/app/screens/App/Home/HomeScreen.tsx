@@ -1,13 +1,14 @@
 /* eslint-disable react-native/no-inline-styles */
 import R from '@app/assets/R'
 import FstImage from '@app/components/FstImage/FstImage'
-import { SCREEN_ROUTER_APP } from '@app/constant/Constant'
+import { DEFAULT_PARAMS, SCREEN_ROUTER_APP } from '@app/constant/Constant'
 import NavigationUtil from '@app/navigation/NavigationUtil'
 import { updateLocation } from '@app/screens/locationReducer'
 import AsyncStorageService from '@app/service/AsyncStorage/AsyncStorageService'
 import { useAppSelector } from '@app/store'
 import { colors, fonts } from '@app/theme'
 import { Permission, PERMISSION_TYPE } from '@app/utils/AppPermission'
+import { formatNumber } from '@app/utils/Format'
 import { hideLoading, showLoading } from '@app/utils/LoadingProgressRef'
 import React, { useCallback, useEffect, useState } from 'react'
 import {
@@ -24,6 +25,9 @@ import {
 import Geolocation from 'react-native-geolocation-service'
 import { useDispatch } from 'react-redux'
 import { getDataUserInfo } from '../Account/slice/AccountSlice'
+import { getListFavoriteFood } from '../Favorite/slice/ListFavoriteFoodSlice'
+import { getListFavoriteRest } from '../Favorite/slice/ListFavoriteRestSlice'
+import ProductApi from '../Product/api/ProductApi'
 import HomeApi from './api/HomeApi'
 const { width } = Dimensions.get('window')
 const HomeScreen = () => {
@@ -76,11 +80,9 @@ const HomeScreen = () => {
   }
 
   return (
-    // v_container chứa giao diện của thẻ SafeAreaView
     <SafeAreaView style={styles.v_container}>
       <ScrollView
         style={styles.v_container}
-        //hiển thị refresh
         refreshControl={<RefreshControl refreshing={false} />}
         showsVerticalScrollIndicator={false}
       >
@@ -93,7 +95,7 @@ const HomeScreen = () => {
     </SafeAreaView>
   )
 }
-// cái này gọi là một Function Components
+
 const Search = () => {
   return (
     <TouchableOpacity
@@ -136,7 +138,7 @@ const styleSearch = StyleSheet.create({
     ...fonts.regular14,
   },
 })
-// cái này gọi là một Function Components
+
 const Category = ({
   setCategoryId,
 }: {
@@ -262,28 +264,50 @@ const styleCategory = StyleSheet.create({
     marginHorizontal: 5,
   },
 })
-// cái này gọi là một Function Components
+
 const ListRestaurant = ({ categoryId }: { categoryId: number }) => {
+  const dispatch = useDispatch()
   const { lat, long } = useAppSelector(state => state.locationReducer)
   const [dataRes, setDataRes] = useState([])
 
   useEffect(() => {
     getDataRestaurant()
-  }, [long, lat, categoryId]) //categoryid được cập nhật thì useefect được chay lại, gọi đến hàm getDataRestaurant
+  }, [long, lat, categoryId])
 
   const getDataRestaurant = async () => {
-    showLoading()
     try {
       const res = await HomeApi.getRestaurant({
-        category: categoryId, //call api vs id đc cập nhật
+        category_id: categoryId,
         lat: lat,
         lng: long,
       })
       setDataRes(res.data)
     } catch (error) {
     } finally {
-      hideLoading()
     }
+  }
+  const handleLike = async (item: any) => {
+    try {
+      if (item.is_like) {
+        await ProductApi.unLikeRestaurant({ id: item.id })
+        getDataRestaurant()
+        dispatch(
+          getListFavoriteRest({
+            page: DEFAULT_PARAMS.PAGE,
+            limit: DEFAULT_PARAMS.LIMIT,
+          })
+        )
+      } else {
+        await ProductApi.likeRestaurant({ id: item.id })
+        getDataRestaurant()
+        dispatch(
+          getListFavoriteRest({
+            page: DEFAULT_PARAMS.PAGE,
+            limit: DEFAULT_PARAMS.LIMIT,
+          })
+        )
+      }
+    } catch (error) {}
   }
   const renderItem = useCallback(({ item }: { item: any }) => {
     return (
@@ -310,13 +334,28 @@ const ListRestaurant = ({ categoryId }: { categoryId: number }) => {
           <Text
             style={{ ...fonts.regular14, color: '#5B5B5E', marginRight: 10 }}
           >
-            free delivery
+            {`${formatNumber(item?.shipping_fee_per_km)} VND`}
           </Text>
           <FstImage style={styleListRes.icon} source={R.images.ic_time} />
           <Text style={{ ...fonts.regular14, color: '#5B5B5E' }}>
             10-15 mins
           </Text>
         </View>
+
+        <TouchableOpacity
+          onPress={() => {
+            handleLike(item)
+          }}
+          style={[
+            styleListRes.icon_like,
+            { backgroundColor: item.is_like ? colors.primary : colors.line },
+          ]}
+        >
+          <FstImage
+            style={{ width: 18, height: 18 }}
+            source={R.images.ic_heart}
+          />
+        </TouchableOpacity>
       </TouchableOpacity>
     )
   }, [])
@@ -349,6 +388,16 @@ const ListRestaurant = ({ categoryId }: { categoryId: number }) => {
 }
 
 const styleListRes = StyleSheet.create({
+  icon_like: {
+    width: 35,
+    height: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 35 / 2,
+    position: 'absolute',
+    top: 15,
+    right: 10,
+  },
   icon: { width: 12, height: 12, marginRight: 5 },
   image: { width: '100%', height: 150, borderRadius: 20 },
   v_container: {
@@ -378,6 +427,7 @@ const styleListRes = StyleSheet.create({
 })
 // cái này gọi là một Function Components
 const ListFood = () => {
+  const dispatch = useDispatch()
   const [dataFood, setDataFood] = useState([])
 
   useEffect(() => {
@@ -393,6 +443,30 @@ const ListFood = () => {
     } finally {
       hideLoading()
     }
+  }
+
+  const handleLike = async (item: any) => {
+    try {
+      if (item.is_like) {
+        await ProductApi.unLikeFood({ food_id: item.id })
+        getDataFood()
+        dispatch(
+          getListFavoriteFood({
+            page: DEFAULT_PARAMS.PAGE,
+            limit: DEFAULT_PARAMS.LIMIT,
+          })
+        )
+      } else {
+        await ProductApi.likeFood({ food_id: item.id })
+        getDataFood()
+        dispatch(
+          getListFavoriteFood({
+            page: DEFAULT_PARAMS.PAGE,
+            limit: DEFAULT_PARAMS.LIMIT,
+          })
+        )
+      }
+    } catch (error) {}
   }
 
   const renderItem = useCallback(({ item }: { item: any }) => {
@@ -416,9 +490,24 @@ const ListFood = () => {
             {item?.description}
           </Text>
         </View>
+        <TouchableOpacity
+          onPress={() => {
+            handleLike(item)
+          }}
+          style={[
+            styleListRes.icon_like,
+            { backgroundColor: item.is_like ? colors.primary : colors.line },
+          ]}
+        >
+          <FstImage
+            style={{ width: 18, height: 18 }}
+            source={R.images.ic_heart}
+          />
+        </TouchableOpacity>
       </TouchableOpacity>
     )
   }, [])
+
   const keyExtractor = useCallback(item => `${item.id}`, [])
   return (
     <View>

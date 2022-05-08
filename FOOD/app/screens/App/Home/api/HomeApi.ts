@@ -1,7 +1,7 @@
 import { ApiClient } from '@app/service/Network/ApiService'
 export default {
   getCategory: () => ApiClient.get(`/api/v1/category`, { params: {} }),
-  getRestaurant: (payload: { category: number; lat: number; lng: number }) =>
+  getRestaurant: (payload: { category_id: number; lat: number; lng: number }) =>
     ApiClient.get(`/api/v1/restaurant`, { params: payload }),
   getFood: (payload: { order_by: string }) =>
     ApiClient.get(`/api/v1/food/all`, { params: payload }),
@@ -10,6 +10,3 @@ export default {
   searchRest: (payload: { name: string }) =>
     ApiClient.get(`/api/v1/restaurant`, { params: payload }),
 }
-
-// đây là file export
-// ta sẽ export (xuất) các api được khai báo trong file này

@@ -21,4 +21,20 @@ export default {
     }),
   addCart: (payload: { food_id: number; quantity: number }) =>
     ApiClient.post(`/api/v1/cart`, payload),
+  getReviews: (payload: { id: number }) =>
+    ApiClient.get(`/api/v1/restaurant/${payload.id}/rating`, {
+      params: payload,
+    }),
+  likeRestaurant: (payload: { id: number }) =>
+    ApiClient.post(`/api/v1/restaurant/${payload.id}/like`, payload),
+  unLikeRestaurant: (payload: { id: number }) =>
+    ApiClient.delete(`/api/v1/restaurant/${payload.id}/unlike`, {
+      params: payload,
+    }),
+  likeFood: (payload: { food_id: number }) =>
+    ApiClient.post(`/api/v1/food/like`, payload),
+  unLikeFood: (payload: { food_id: number }) =>
+    ApiClient.delete(`/api/v1/food/unlike`, {
+      params: payload,
+    }),
 }

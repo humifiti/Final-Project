@@ -1,7 +1,8 @@
 import R from '@app/assets/R'
 import Empty from '@app/components/Empty/Empty'
 import FstImage from '@app/components/FstImage/FstImage'
-import { DEFAULT_PARAMS } from '@app/constant/Constant'
+import { DEFAULT_PARAMS, SCREEN_ROUTER_APP } from '@app/constant/Constant'
+import NavigationUtil from '@app/navigation/NavigationUtil'
 import { useAppSelector } from '@app/store'
 import { colors, fonts } from '@app/theme'
 import { formatNumber } from '@app/utils/Format'
@@ -70,31 +71,35 @@ const FavoriteRestaurant = () => {
     return (
       <TouchableOpacity
         onPress={() => {
-          //   NavigationUtil.navigate(SCREEN_ROUTER_APP.FOOD_DETAIL, {
-          //     id: item.id,
-          //   })
+          NavigationUtil.navigate(SCREEN_ROUTER_APP.RESTAURANT_DETAIL, {
+            id: item.restaurant_id,
+          })
         }}
         style={styles.v_container}
       >
-        <FstImage style={styles.image} source={R.images.img_food_banner} />
-        <Text style={styles.txt_name}>{'Cơm rang'}</Text>
+        <FstImage
+          style={styles.image}
+          source={{ uri: item?.restaurant?.logo?.url }}
+        />
+        <Text style={styles.txt_name}>{item?.restaurant?.name}</Text>
         <View style={styles.v_row}>
           <FstImage style={styles.icon} source={R.images.ic_delivery} />
           <Text
             style={{ ...fonts.regular14, color: '#5B5B5E', marginRight: 10 }}
           >
-            free delivery
+            {`${formatNumber(item.restaurant?.shipping_fee_per_km)} VND`}
           </Text>
           <FstImage style={styles.icon} source={R.images.ic_time} />
           <Text style={{ ...fonts.regular14, color: '#5B5B5E' }}>
             10-15 mins
           </Text>
         </View>
-        <View style={styles.v_price}>
-          <Text style={{ ...fonts.semi_bold20 }}>{`${formatNumber(
-            10000
-          )} đ`}</Text>
-        </View>
+        <TouchableOpacity style={[styles.icon_like]}>
+          <FstImage
+            style={{ width: 18, height: 18 }}
+            source={R.images.ic_heart}
+          />
+        </TouchableOpacity>
       </TouchableOpacity>
     )
   }, [])
@@ -128,6 +133,17 @@ const FavoriteRestaurant = () => {
 export default FavoriteRestaurant
 
 const styles = StyleSheet.create({
+  icon_like: {
+    backgroundColor: colors.primary,
+    width: 35,
+    height: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 35 / 2,
+    position: 'absolute',
+    top: 15,
+    right: 10,
+  },
   v_load_more: {
     marginVertical: 15,
   },

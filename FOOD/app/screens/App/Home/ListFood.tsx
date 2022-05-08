@@ -1,55 +1,76 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
+import R from '@app/assets/R'
+import Empty from '@app/components/Empty/Empty'
+import FstImage from '@app/components/FstImage/FstImage'
+import { DEFAULT_PARAMS, SCREEN_ROUTER_APP } from '@app/constant/Constant'
+import NavigationUtil from '@app/navigation/NavigationUtil'
+import { colors, fonts } from '@app/theme'
+import { formatNumber } from '@app/utils/Format'
+import { hideLoading, showLoading } from '@app/utils/LoadingProgressRef'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
+  Dimensions,
   FlatList,
   Platform,
   StyleSheet,
   Text,
-  View,
   TouchableOpacity,
-  Dimensions,
-  Alert,
+  View,
 } from 'react-native'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import FstImage from '@app/components/FstImage/FstImage'
-import { fonts } from '@app/theme'
-import R from '@app/assets/R'
+import { useDispatch } from 'react-redux'
+import { getListFavoriteFood } from '../Favorite/slice/ListFavoriteFoodSlice'
+import ProductApi from '../Product/api/ProductApi'
 import HomeApi from './api/HomeApi'
-import { formatNumber } from '@app/utils/Format'
-import { hideLoading, showLoading } from '@app/utils/LoadingProgressRef'
-import Empty from '@app/components/Empty/Empty'
-import NavigationUtil from '@app/navigation/NavigationUtil'
-import { SCREEN_ROUTER_APP } from '@app/constant/Constant'
 
 const { width } = Dimensions.get('window')
 
 const ListFood = (props: { searchText: string }) => {
   const [dataListFood, setDataListFood] = useState([])
   const refTimeout = useRef<any>()
-  // useEffect là hàm tự động chay vào khi vào màn lần đầu tiên
+  const dispatch = useDispatch()
+
   useEffect(() => {
     if (refTimeout.current) clearTimeout(refTimeout.current)
 
     refTimeout.current = setTimeout(() => {
-      getListFood() // gọi tới hàm call API
+      getListFood()
     }, 500)
-  }, [props.searchText]) // props.SeachText ở đây để khi searchText thay đổi thì nó sẽ chạy lại hàm useEffect, nếu ko có nó sẽ không chạy lại
-
-  //hàm useEffect sẽ được tự động gọi mỗi khi tk searchText thay đổi,
-  // nghĩa là khi thằng search của màn Seach Screen, hay ta gõ text
+  }, [props.searchText])
 
   const getListFood = async () => {
-    // đây là hàm cha để gọi api
     showLoading()
     try {
-      const res = await HomeApi.searchFood({ name: props.searchText }) // đây là bước gọi API
-      setDataListFood(res.data) //res.data là dữ liệu api trả về, ta truyền res.data vào hàm setData để lưu dữ liệu vào biến state tên là data
-      // nếu hàm chạy thành công thì nó sẽ ko vào catch
+      const res = await HomeApi.searchFood({ name: props.searchText })
+      setDataListFood(res.data)
     } catch (error) {
-      //nếu mà không chạy vào đây
     } finally {
       hideLoading()
     }
+  }
+
+  const handleLike = async (item: any) => {
+    try {
+      if (item.is_like) {
+        await ProductApi.unLikeFood({ food_id: item.id })
+        getListFood()
+        dispatch(
+          getListFavoriteFood({
+            page: DEFAULT_PARAMS.PAGE,
+            limit: DEFAULT_PARAMS.LIMIT,
+          })
+        )
+      } else {
+        await ProductApi.likeFood({ food_id: item.id })
+        getListFood()
+        dispatch(
+          getListFavoriteFood({
+            page: DEFAULT_PARAMS.PAGE,
+            limit: DEFAULT_PARAMS.LIMIT,
+          })
+        )
+      }
+    } catch (error) {}
   }
 
   const renderItem = useCallback(({ item }: { item: any }) => {
@@ -80,6 +101,20 @@ const ListFood = (props: { searchText: string }) => {
             item.price
           )} đ`}</Text>
         </View>
+        <TouchableOpacity
+          onPress={() => {
+            handleLike(item)
+          }}
+          style={[
+            styleListFood.icon_like,
+            { backgroundColor: item.is_like ? colors.primary : colors.line },
+          ]}
+        >
+          <FstImage
+            style={{ width: 18, height: 18 }}
+            source={R.images.ic_heart}
+          />
+        </TouchableOpacity>
       </TouchableOpacity>
     )
   }, [])
@@ -92,8 +127,8 @@ const ListFood = (props: { searchText: string }) => {
       contentContainerStyle={{ paddingBottom: 50 }}
       style={styleListFood.v_listProduct}
       columnWrapperStyle={styleListFood.v_column}
-      data={dataListFood} // truyền dữ liệu từ api trả về vào FlatList thông qua truyền dataListFood vào data
-      renderItem={renderItem} // hiện thị ra các Item
+      data={dataListFood}
+      renderItem={renderItem}
       keyExtractor={keyExtractor}
       showsVerticalScrollIndicator={false}
       numColumns={2}
@@ -105,6 +140,16 @@ const ListFood = (props: { searchText: string }) => {
 export default ListFood
 
 const styleListFood = StyleSheet.create({
+  icon_like: {
+    width: 35,
+    height: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 35 / 2,
+    position: 'absolute',
+    top: 15,
+    right: 10,
+  },
   v_listProduct: {
     paddingHorizontal: 25,
     paddingBottom: Platform.OS === 'ios' ? 60 : 80,

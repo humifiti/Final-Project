@@ -1,7 +1,9 @@
+/* eslint-disable react-native/no-inline-styles */
 import R from '@app/assets/R'
 import Empty from '@app/components/Empty/Empty'
 import FstImage from '@app/components/FstImage/FstImage'
-import { DEFAULT_PARAMS } from '@app/constant/Constant'
+import { DEFAULT_PARAMS, SCREEN_ROUTER_APP } from '@app/constant/Constant'
+import NavigationUtil from '@app/navigation/NavigationUtil'
 import { useAppSelector } from '@app/store'
 import { colors, fonts } from '@app/theme'
 import { formatNumber } from '@app/utils/Format'
@@ -30,7 +32,7 @@ const FavoriteFood = () => {
     limit: DEFAULT_PARAMS.LIMIT,
   })
 
-  var onEndReachedCalledDuringMomentum = true
+  // var onEndReachedCalledDuringMomentum = true
 
   useEffect(() => {
     getData()
@@ -48,18 +50,18 @@ const FavoriteFood = () => {
     })
   }
 
-  const onMomentumScrollBegin = () => {
-    onEndReachedCalledDuringMomentum = false
-  }
+  // const onMomentumScrollBegin = () => {
+  //   onEndReachedCalledDuringMomentum = false
+  // }
 
-  const handleLoadMore = () => {
-    if (!onEndReachedCalledDuringMomentum && !isLastPage && !isLoadMore) {
-      setBody({
-        ...body,
-        page: body.page + 1,
-      })
-    }
-  }
+  // const handleLoadMore = () => {
+  //   if (!onEndReachedCalledDuringMomentum && !isLastPage && !isLoadMore) {
+  //     setBody({
+  //       ...body,
+  //       page: body.page + 1,
+  //     })
+  //   }
+  // }
 
   if (isLoading) {
     showLoading()
@@ -70,20 +72,28 @@ const FavoriteFood = () => {
     return (
       <TouchableOpacity
         onPress={() => {
-          //   NavigationUtil.navigate(SCREEN_ROUTER_APP.FOOD_DETAIL, {
-          //     id: item.id,
-          //   })
+          NavigationUtil.navigate(SCREEN_ROUTER_APP.RESTAURANT_DETAIL, {
+            id: item.food.restaurant_id,
+          })
         }}
         style={styles.v_container}
       >
-        <FstImage style={styles.image} source={R.images.img_food_banner} />
-        <Text style={styles.txt_name}>{'Cơm rang'}</Text>
-        <Text style={styles.txt_desc}>{'Món ngon'}</Text>
+        <FstImage style={styles.image} source={{ uri: item.food.images.url }} />
+        <Text style={styles.txt_name}>{item.food.name}</Text>
+        <Text numberOfLines={2} style={styles.txt_desc}>
+          {item.food.description}
+        </Text>
         <View style={styles.v_price}>
-          <Text style={{ ...fonts.semi_bold20 }}>{`${formatNumber(
-            10000
-          )} đ`}</Text>
+          <Text
+            style={{ ...fonts.regular18, fontWeight: '500' }}
+          >{`${formatNumber(item.food.price)} đ`}</Text>
         </View>
+        <TouchableOpacity style={[styles.icon_like]}>
+          <FstImage
+            style={{ width: 18, height: 18 }}
+            source={R.images.ic_heart}
+          />
+        </TouchableOpacity>
       </TouchableOpacity>
     )
   }, [])
@@ -99,8 +109,8 @@ const FavoriteFood = () => {
       keyExtractor={keyExtractor}
       showsVerticalScrollIndicator={false}
       onEndReachedThreshold={0.1}
-      onMomentumScrollBegin={onMomentumScrollBegin}
-      onEndReached={handleLoadMore}
+      //onMomentumScrollBegin={onMomentumScrollBegin}
+      //onEndReached={handleLoadMore}
       ListFooterComponent={
         isLoadMore ? (
           <ActivityIndicator
@@ -117,6 +127,17 @@ const FavoriteFood = () => {
 export default FavoriteFood
 
 const styles = StyleSheet.create({
+  icon_like: {
+    backgroundColor: colors.primary,
+    width: 35,
+    height: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 35 / 2,
+    position: 'absolute',
+    top: 15,
+    right: 10,
+  },
   v_load_more: {
     marginVertical: 15,
   },

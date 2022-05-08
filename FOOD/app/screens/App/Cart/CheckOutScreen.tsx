@@ -39,7 +39,6 @@ const CheckOutScreen = (props: any) => {
     },
   ])
   const paymentMethod = useRef(0)
-  // chạy vào đây đầu tiên để gọi vào hàm getAddressDefault
   useEffect(() => {
     getAddressDefault()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -47,10 +46,7 @@ const CheckOutScreen = (props: any) => {
 
   const getAddressDefault = async () => {
     try {
-      // call api getAddress Default
       const res = await AddressApi.getAddressDefault()
-      // sau khi call xong api trên ta sẽ có id của địa chỉ mặc định để gọi
-      // api trong hàm preCheckOut()
       preCheckOut(res.data.id)
       setAddressDefault(res.data)
     } catch (error) {}
@@ -68,7 +64,6 @@ const CheckOutScreen = (props: any) => {
     preCheckOut(item.id)
   }
 
-  // bấm vào confirm order thì gọi hàm này
   const checkOut = async () => {
     if (paymentMethod.current === 0) {
       showMessages(R.strings().notification, 'Please choose payment method')
@@ -120,7 +115,6 @@ const CheckOutScreen = (props: any) => {
       forceInset={['left']}
       children={
         <ScrollView style={styles.v_container}>
-          {/* giao diện địa chỉ */}
           <TouchableOpacity
             onPress={() => {
               NavigationUtil.navigate(SCREEN_ROUTER_APP.DELIVERY_ADDRESS, {

@@ -24,21 +24,12 @@ import CartApi from './api/CartApi'
 import { getListCart, updateQuantity } from './slice/CartSlice'
 
 const CartScreen = () => {
-  // đây là dữ liệu APi cart trả về
-  // data là dữ liệu giỏ hàng
-  // totalPrice là dữ liệu giá tiền
   const { isLoading, data, totalPrice } = useAppSelector(
     state => state.cartReducer
   )
   const dispatch = useAppDispatch()
 
-  //
-  // const [data, setData] = useState([])
   useEffect(() => {
-    //hàm call Api danh sách cart
-
-    // gọi vào hàm getListCart ở file CartSlice để call API
-    // thằng này để câp nhật dự liệu giỏ hàng cho tk data ở trên
     dispatch(getListCart())
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -55,10 +46,8 @@ const CartScreen = () => {
         quantity,
       }
       try {
-        // khi bấm + - sẽ gọi api update số lượng giỏ hàng
         await CartApi.updateCart(payload)
-        // dùng dispatch để gọi vào hàm updateQuantitty trong fileCartSlice
-        // tk này cập nhật dữ liệu số lượng cho tk data và giá giỏ hàng cho tk totalPrice
+
         dispatch(
           updateQuantity({
             index,
@@ -70,7 +59,6 @@ const CartScreen = () => {
     [dispatch]
   )
 
-  // hàm gọi remove món ăn trong giỏ hàng
   const handleRemoveItem = useCallback(
     (food_id: number) => {
       showConfirm(

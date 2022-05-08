@@ -11,19 +11,22 @@ import {
 } from 'react-native'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import FstImage from '@app/components/FstImage/FstImage'
-import { fonts } from '@app/theme'
+import { colors, fonts } from '@app/theme'
 import R from '@app/assets/R'
 import HomeApi from './api/HomeApi'
 import Empty from '@app/components/Empty/Empty'
 import { hideLoading, showLoading } from '@app/utils/LoadingProgressRef'
 import NavigationUtil from '@app/navigation/NavigationUtil'
-import { SCREEN_ROUTER_APP } from '@app/constant/Constant'
+import { DEFAULT_PARAMS, SCREEN_ROUTER_APP } from '@app/constant/Constant'
+import ProductApi from '../Product/api/ProductApi'
+import { useDispatch } from 'react-redux'
+import { getListFavoriteRest } from '../Favorite/slice/ListFavoriteRestSlice'
 
 const { width } = Dimensions.get('window')
 const ListRestaurant = (props: { search: string }) => {
   const [data, setData] = useState([])
   const refTimeout = useRef<any>()
-
+  const dispatch = useDispatch()
   useEffect(() => {
     if (refTimeout.current) clearTimeout(refTimeout.current)
 
@@ -42,6 +45,29 @@ const ListRestaurant = (props: { search: string }) => {
       hideLoading()
     }
   }
+  const handleLike = async (item: any) => {
+    try {
+      if (item.is_like) {
+        await ProductApi.unLikeRestaurant({ id: item.id })
+        getListRest()
+        dispatch(
+          getListFavoriteRest({
+            page: DEFAULT_PARAMS.PAGE,
+            limit: DEFAULT_PARAMS.LIMIT,
+          })
+        )
+      } else {
+        await ProductApi.likeRestaurant({ id: item.id })
+        getListRest()
+        dispatch(
+          getListFavoriteRest({
+            page: DEFAULT_PARAMS.PAGE,
+            limit: DEFAULT_PARAMS.LIMIT,
+          })
+        )
+      }
+    } catch (error) {}
+  }
   const renderItem = useCallback(({ item }: { item: any }) => {
     return (
       <TouchableOpacity
@@ -53,7 +79,7 @@ const ListRestaurant = (props: { search: string }) => {
         style={styleListRes.v_container}
       >
         <View style={{ flexDirection: 'row' }}>
-          <View style={{}}>
+          <View>
             <View style={styleListRes.v_item}>
               <FstImage
                 style={styleListRes.image}
@@ -86,6 +112,20 @@ const ListRestaurant = (props: { search: string }) => {
             5-10 mins
           </Text>
         </View>
+        <TouchableOpacity
+          onPress={() => {
+            handleLike(item)
+          }}
+          style={[
+            styleListRes.icon_like,
+            { backgroundColor: item.is_like ? colors.primary : colors.line },
+          ]}
+        >
+          <FstImage
+            style={{ width: 15, height: 15 }}
+            source={R.images.ic_heart}
+          />
+        </TouchableOpacity>
       </TouchableOpacity>
     )
   }, [])
@@ -110,6 +150,16 @@ const ListRestaurant = (props: { search: string }) => {
 export default ListRestaurant
 
 const styleListRes = StyleSheet.create({
+  icon_like: {
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 30 / 2,
+    position: 'absolute',
+    top: 15,
+    right: 10,
+  },
   v_listProduct: {
     paddingHorizontal: 25,
     paddingBottom: Platform.OS === 'ios' ? 60 : 80,

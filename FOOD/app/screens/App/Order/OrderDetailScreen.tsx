@@ -2,6 +2,8 @@
 import R from '@app/assets/R'
 import FstImage from '@app/components/FstImage/FstImage'
 import ScreenWrapper from '@app/components/Screen/ScreenWrapper'
+import { SCREEN_ROUTER_APP } from '@app/constant/Constant'
+import NavigationUtil from '@app/navigation/NavigationUtil'
 import { colors, dimensions, fonts } from '@app/theme'
 import DateUtil from '@app/utils/DateUtil'
 import { formatNumber } from '@app/utils/Format'
@@ -127,10 +129,26 @@ const OrderDetailScreen = (props: any) => {
             </Text>
           </View>
           <View style={styles.v_button}>
-            <TouchableOpacity style={styles.button1}>
+            <TouchableOpacity
+              onPress={() => {
+                NavigationUtil.navigate(SCREEN_ROUTER_APP.RATE_RESTAURANT, {
+                  logo: data?.order.restaurant.logo.url,
+                  name: data?.order.restaurant?.name,
+                  id: data?.order.restaurant.id,
+                })
+              }}
+              style={styles.button1}
+            >
               <Text style={{ ...fonts.semi_bold16 }}>Rate</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button2}>
+            <TouchableOpacity
+              onPress={() => {
+                NavigationUtil.navigate(SCREEN_ROUTER_APP.RESTAURANT_DETAIL, {
+                  id: data?.order.restaurant.id,
+                })
+              }}
+              style={styles.button2}
+            >
               <Text style={styles.text}>Re-Order</Text>
             </TouchableOpacity>
           </View>
